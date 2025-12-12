@@ -28,6 +28,9 @@
 
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": [
+      "@kitajs/html/htmx.d.ts"
+    ]
   }
 }

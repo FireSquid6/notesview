@@ -6,23 +6,32 @@ import { marked } from "marked";
 import hljs from "highlight.js";
 
 
-export async function renderHtml(markdown: string): Promise<string> {
-  const options = {
-    render: (formula: string, displayMode: boolean) => Katex.renderToString(formula, { displayMode: true })
+const options = {
+  render: (formula: string, displayMode: boolean) => { 
+    const output = Katex.renderToString(formula, { 
+      displayMode: displayMode,
+      throwOnError: false,
+    });
+
+    return output;
   }
+}
+marked.use(extendedLatex(options));
+marked.use(markedHighlight({
+  emptyLangClass: "hljs",
+  langPrefix: "hljs language-",
+  highlight(code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : "plaintext";
+    return hljs.highlight(code, { language }).value;
+  }
+}));
 
-  marked.use(extendedLatex(options));
-  marked.use(markedHighlight({
-    emptyLangClass: "hljs",
-    langPrefix: "hljs language-",
-    highlight(code, lang) {
-      const language = hljs.getLanguage(lang) ? lang : "plaintext";
-      return hljs.highlight(code, { language }).value;
-    }
-  }));
 
 
-  const html = await marked(markdown); 
+export async function renderHtml(markdown: string): Promise<string> {
+
+
+  const html = await marked(markdown);
 
   return html;
 }

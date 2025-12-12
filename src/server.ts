@@ -15,7 +15,10 @@ export const PACKAGE_FILES_PREFIX = "/__packagefiles";
 
 export const packageFiles: Record<string, string> = {
   "highlight.css": "node_modules/highlight.js/styles/tokyo-night-dark.css",
+  "katex.css": "node_modules/katex/dist/katex.css",
   "htmx.js": "node_modules/htmx.org/dist/htmx.min.js",
+  "katex.js": "node_modules/katex/dist/katex.js",
+  "tailwind.css": "node_modules/tailwindcss/index.css",
 }
 
 export function serveDirectory({ port, directory }: ServeOptions) {
@@ -39,8 +42,15 @@ export function serveDirectory({ port, directory }: ServeOptions) {
       return ctx.status(200, Bun.file(filepath));
 
     })
+    .get(`${PACKAGE_FILES_PREFIX}/fonts/*`, async (ctx)=> {
+      const fontName = ctx.path.split("/").pop()!;
+      const filepath = path.join("node_modules/katex/dist/fonts", fontName);
+
+      return Bun.file(filepath);
+
+    })
     .get(`${PACKAGE_FILES_PREFIX}/*`, async (ctx) => {
-      const requestedFilename = ctx.path.split("\n").pop()!;
+      const requestedFilename = ctx.path.split("/").pop()!;
       const foundFilename = Object.keys(packageFiles).find(k => k === requestedFilename);
 
       if (foundFilename === undefined) {
@@ -52,6 +62,7 @@ export function serveDirectory({ port, directory }: ServeOptions) {
         "..",
         packageFiles[foundFilename]!
       );
+
 
       if (!fs.existsSync(filepath)) {
         return ctx.status(404);
