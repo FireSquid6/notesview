@@ -12,12 +12,17 @@
     "@commander-js/extra-typings": "^14.0.0",
     "@elysiajs/cors": "^1.1.0",
     "@elysiajs/static": "^1.1.0",
+    "@kitajs/html": "^4.2.11",
     "@sinclair/typebox": "^0.34.41",
     "commander": "^14.0.2",
     "elysia": "^1.4.18",
+    "highlight.js": "^11.11.1",
+    "htmx.org": "^2.0.8",
+    "katex": "^0.16.27",
     "logestic": "^1.2.3",
-    "markdown-it": "^14.1.0",
-    "markdown-it-latex": "^0.2.0"
+    "marked": "^17.0.1",
+    "marked-extended-latex": "^1.1.0",
+    "marked-highlight": "^2.2.3"
   },
   "scripts": {
     "dev": "bun run entrypoints/dev.ts"

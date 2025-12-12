@@ -5,7 +5,9 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
+
     "jsx": "react-jsx",
+    "jsxImportSource": "@kitajs/html",
     "allowJs": true,
 
     // Bundler mode

@@ -1,6 +1,28 @@
+// @ts-expect-error no types
+import extendedLatex from "marked-extended-latex";
+import { markedHighlight } from "marked-highlight";
+import Katex from "katex";
+import { marked } from "marked";
+import hljs from "highlight.js";
 
 
+export async function renderHtml(markdown: string): Promise<string> {
+  const options = {
+    render: (formula: string, displayMode: boolean) => Katex.renderToString(formula, { displayMode: true })
+  }
 
-export function convertToHtml(markdown: string): string {
+  marked.use(extendedLatex(options));
+  marked.use(markedHighlight({
+    emptyLangClass: "hljs",
+    langPrefix: "hljs language-",
+    highlight(code, lang) {
+      const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      return hljs.highlight(code, { language }).value;
+    }
+  }));
 
+
+  const html = await marked(markdown); 
+
+  return html;
 }
