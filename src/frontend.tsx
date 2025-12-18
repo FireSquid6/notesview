@@ -1,37 +1,20 @@
-import { PACKAGE_FILES_PREFIX } from "./server";
+/**
+ * This file is the entry point for the React app, it sets up the root
+ * element and renders the App component to the DOM.
+ *
+ * It is included in `src/index.html`.
+ */
 
-export interface PageOptions {
-  content: string;
+import { createRoot } from "react-dom/client";
+import { App } from "./App";
+
+function start() {
+  const root = createRoot(document.getElementById("root")!);
+  root.render(<App />);
 }
 
-
-export function getPage({ content }: PageOptions): JSX.Element {
-  return (
-    <html>
-      <head>
-        <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/highlight.css`} />
-        <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/katex.css`} />
-        <script src={`${PACKAGE_FILES_PREFIX}/htmx.js`} />
-        <script src={`${PACKAGE_FILES_PREFIX}/katex.js`} />
-
-      </head>
-      <body hx-boost>
-        <div>
-          <p>This is where more stuff will go</p>
-        </div>
-        <div>
-          <main>
-            {content}
-          </main>
-        </div>
-      </body>
-    </html>
-  )
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", start);
+} else {
+  start();
 }
-
-
-export function jsxToHtml(jsx: JSX.Element): string {
-  return `<!DOCTYPE HTML>\n${jsx}`;
-}
-
-

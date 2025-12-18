@@ -11,7 +11,7 @@
         bun
         nodejs_20
         flyctl
-        libgcc
+        typescript
       ];
     };
   };
