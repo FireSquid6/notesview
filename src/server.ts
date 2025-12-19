@@ -91,9 +91,12 @@ export function serveDirectory({ port, directory }: ServeOptions) {
 
       const text = fs.readFileSync(filepath).toString();
       const content = await renderHtml(text);
+      const filename = path.basename(filepath);
+
 
       const page = getPage({
         content,
+        filename,
       });
       const html = jsxToHtml(page);
 

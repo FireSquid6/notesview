@@ -33,50 +33,7 @@ export function getPage({ content, filename }: PageOptions): JSX.Element {
         <link rel="stylesheet" href={`${MDSERVE_ROUTE}/main.css`} />
         <script src={`${PACKAGE_FILES_PREFIX}/htmx.js`} />
         <script src={`${PACKAGE_FILES_PREFIX}/katex.js`} />
-        <script>{`
-          document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar toggle functionality
-            const sidebarToggle = document.getElementById('sidebar-toggle');
-            const sidebar = document.getElementById('sidebar');
-            
-            if (sidebarToggle && sidebar) {
-              sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-                const icon = sidebarToggle.querySelector('.toggle-icon');
-                if (icon) {
-                  icon.textContent = sidebar.classList.contains('collapsed') ? '☰' : '✕';
-                }
-              });
-            }
-            
-            // Folder toggle functionality
-            document.querySelectorAll('.folder-item').forEach(folder => {
-              folder.addEventListener('click', function(e) {
-                e.preventDefault();
-                const folderName = this.dataset.folder;
-                const expanded = this.classList.contains('expanded');
-                
-                // Toggle folder state
-                this.classList.toggle('expanded');
-                
-                // Toggle chevron
-                const chevron = this.querySelector('.folder-chevron');
-                if (chevron) {
-                  chevron.textContent = expanded ? '▶' : '▼';
-                }
-                
-                // Show/hide child files
-                document.querySelectorAll(\`[data-parent="\${folderName}"]\`).forEach(child => {
-                  if (expanded) {
-                    child.style.display = 'none';
-                  } else {
-                    child.style.display = 'flex';
-                  }
-                });
-              });
-            });
-          });
-        `}</script>
+        <script src={`${MDSERVE_ROUTE}/main.js`} />
       </head>
       <body hx-boost>
         <div class="app-layout">
@@ -101,24 +58,23 @@ export function getPage({ content, filename }: PageOptions): JSX.Element {
                 {dummyFiles.map((file, index) => {
                   if (file.type === 'folder') {
                     return (
-                      <div key={index} className={`file-item folder-item ${file.expanded ? 'expanded' : ''}`} data-folder={file.name} style={{ paddingLeft: `${file.level * 1.5 + 0.75}rem` }}>
-                        <span className="folder-chevron">{file.expanded ? '▼' : '▶'}</span>
-                        <span className="file-icon">📁</span>
-                        <span className="file-name">{file.name}</span>
+                      <div class={`file-item folder-item ${file.expanded ? 'expanded' : ''}`} data-folder={file.name} style={{ paddingLeft: `${file.level * 1.5 + 0.75}rem` }}>
+                        <span class="folder-chevron">{file.expanded ? '▼' : '▶'}</span>
+                        <span class="file-icon">📁</span>
+                        <span class="file-name">{file.name}</span>
                       </div>
                     );
                   } else {
                     const isVisible = !file.parent || dummyFiles.find(f => f.name === file.parent && f.type === 'folder')?.expanded;
                     return (
-                      <div key={index} 
-                           className={`file-item ${file.active ? 'active' : ''}`} 
+                      <div class={`file-item ${file.active ? 'active' : ''}`} 
                            data-parent={file.parent}
                            style={{ 
                              paddingLeft: `${file.level * 1.5 + 0.75}rem`,
                              display: isVisible ? 'flex' : 'none'
                            }}>
-                        <span className="file-icon">📄</span>
-                        <span className="file-name">{file.name}</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">{file.name}</span>
                       </div>
                     );
                   }
