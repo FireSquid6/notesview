@@ -108,7 +108,7 @@ function getDirectoryChildren(directory: string): Node[] {
 
       nodes.push({
         type: "file",
-        name: filename,
+        name: path.basename(filename, ".md"),
         content: {
           type: "markdown-file",
           filepath: filepath,
