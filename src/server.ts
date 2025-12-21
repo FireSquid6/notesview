@@ -79,6 +79,7 @@ export function serveDirectory({ port, directory }: ServeOptions) {
 
       let filepath = "";
       for (const fp of filepathOptions) {
+        // TODO - build a better filepath system
         if (fs.existsSync(fp)) {
           filepath = fp;
           break;

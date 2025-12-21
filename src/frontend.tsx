@@ -3,10 +3,20 @@ import { MDSERVE_ROUTE, PACKAGE_FILES_PREFIX } from "./server";
 export interface PageOptions {
   content: string;
   filename: string;
+  sidebar: SidebarItem[];
+}
+
+export interface SidebarItem {
+  name: string;
+  type: "file" | "folder";
+  active: boolean;
+  parent: string;
+  expanded: boolean;
+  level: number;
 }
 
 
-export function getPage({ content, filename }: PageOptions): JSX.Element {
+export function getPage({ content, filename, sidebar }: PageOptions): JSX.Element {
   const dummyFiles = [
     { name: "README.md", type: "file", active: filename === "README.md", level: 0 },
     { name: "docs", type: "folder", expanded: true, level: 0 },
@@ -55,7 +65,7 @@ export function getPage({ content, filename }: PageOptions): JSX.Element {
                 <h3>Files</h3>
               </div>
               <nav class="file-list">
-                {dummyFiles.map((file, index) => {
+                {sidebar.map((file) => {
                   if (file.type === 'folder') {
                     return (
                       <div class={`file-item folder-item ${file.expanded ? 'expanded' : ''}`} data-folder={file.name} style={{ paddingLeft: `${file.level * 1.5 + 0.75}rem` }}>
@@ -66,16 +76,18 @@ export function getPage({ content, filename }: PageOptions): JSX.Element {
                     );
                   } else {
                     const isVisible = !file.parent || dummyFiles.find(f => f.name === file.parent && f.type === 'folder')?.expanded;
+                    const filePath = file.parent ? `${file.parent}/${file.name}` : file.name;
                     return (
-                      <div class={`file-item ${file.active ? 'active' : ''}`} 
-                           data-parent={file.parent}
-                           style={{ 
-                             paddingLeft: `${file.level * 1.5 + 0.75}rem`,
-                             display: isVisible ? 'flex' : 'none'
-                           }}>
+                      <a href={`/${encodeURIComponent(filePath)}`} 
+                         class={`file-item file-link ${file.active ? 'active' : ''}`} 
+                         data-parent={file.parent}
+                         style={{ 
+                           paddingLeft: `${file.level * 1.5 + 0.75}rem`,
+                           display: isVisible ? 'flex' : 'none'
+                         }}>
                         <span class="file-icon">📄</span>
                         <span class="file-name">{file.name}</span>
-                      </div>
+                      </a>
                     );
                   }
                 })}
