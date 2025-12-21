@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { renderHtml } from "./renderer";
 import { getPage, jsxToHtml } from "./frontend";
-import { getFileTree, matchFilePath } from "./filemap";
+import { filemapToSidebar, getFileTree, matchFilePath } from "./filemap";
 
 
 export interface ServeOptions {
@@ -23,8 +23,11 @@ export const packageFiles: Record<string, string> = {
 }
 
 export function serveDirectory({ port, directory }: ServeOptions) {
+  const ft = getFileTree(directory);
+  console.log(ft);
+
   new Elysia()
-    .state("filetree", getFileTree(directory))
+    .state("filetree", ft)
     .get(`${MDSERVE_ROUTE}/*`, (ctx) => {
       const split = ctx.path.split("/");
       split.shift();
@@ -75,6 +78,11 @@ export function serveDirectory({ port, directory }: ServeOptions) {
     })
     .get("/*", async (ctx) => {
       const pathParts = ctx.path.split("/");
+
+      while (pathParts[0] === "") {
+        pathParts.shift();
+      }
+      console.log(pathParts);
       // TODO - ensure path parts actually starts
       const contentData = matchFilePath(pathParts, ctx.store.filetree);
 
@@ -85,16 +93,17 @@ export function serveDirectory({ port, directory }: ServeOptions) {
 
       if (contentData.type === "directory-listing") {
         // TODO - directory listing
-        return ctx.status(404);
+        return ctx.status(500);
       }
 
       const text = fs.readFileSync(contentData.filepath).toString();
       const content = await renderHtml(text);
       const filename = path.basename(contentData.filepath);
+      const sidebar = filemapToSidebar(ctx.store.filetree, pathParts);
 
 
       const page = getPage({
-        sidebar: [],
+        sidebar,
         content,
         filename,
       });

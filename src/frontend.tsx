@@ -43,7 +43,7 @@ export function getPage({ content, filename, sidebar }: PageOptions): JSX.Elemen
               <div class="filename-display">{filename || "Untitled"}</div>
             </div>
           </header>
-          
+
           <div class="main-layout">
             <aside id="sidebar" class="sidebar">
               <div class="sidebar-header">
@@ -63,13 +63,13 @@ export function getPage({ content, filename, sidebar }: PageOptions): JSX.Elemen
                     const isVisible = !file.parent || sidebar.find(f => f.name === file.parent && f.type === 'folder')?.expanded;
                     const filePath = file.parent ? `${file.parent}/${file.name}` : file.name;
                     return (
-                      <a href={`/${encodeURIComponent(filePath)}`} 
-                         class={`file-item file-link ${file.active ? 'active' : ''}`} 
-                         data-parent={file.parent}
-                         style={{ 
-                           paddingLeft: `${file.level * 1.5 + 0.75}rem`,
-                           display: isVisible ? 'flex' : 'none'
-                         }}>
+                      <a href={`/${encodeURIComponent(filePath)}`}
+                        class={`file-item file-link ${file.active ? 'active' : ''}`}
+                        data-parent={file.parent}
+                        style={{
+                          paddingLeft: `${file.level * 1.5 + 0.75}rem`,
+                          display: isVisible ? 'flex' : 'none'
+                        }}>
                         <span class="file-icon">📄</span>
                         <span class="file-name">{file.name}</span>
                       </a>
@@ -78,7 +78,7 @@ export function getPage({ content, filename, sidebar }: PageOptions): JSX.Elemen
                 })}
               </nav>
             </aside>
-            
+
             <main class="content-wrapper">
               <div class="content">
                 {content}

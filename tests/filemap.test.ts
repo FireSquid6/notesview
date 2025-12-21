@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import fs from "fs";
 import path from "path";
-import { getFileTree, matchFilePath, type Node, type ContentData } from "../src/filemap";
+import { getFileTree, matchFilePath, filemapToSidebar, type Node, type ContentData } from "../src/filemap";
 
 const TEST_DIR = path.join(process.cwd(), "test-temp");
 
@@ -245,9 +245,9 @@ describe("filemap", () => {
       const deep = path.join(TEST_DIR, "a", "b", "c", "d");
       fs.mkdirSync(deep, { recursive: true });
       fs.writeFileSync(path.join(deep, "deep.md"), "# Deep");
-      
+
       const result = getFileTree(TEST_DIR);
-      
+
       // Navigate through the nested structure
       let current = result;
       for (const dir of ["a", "b", "c", "d"]) {
@@ -256,9 +256,270 @@ describe("filemap", () => {
         expect(current.name).toBe(dir);
         expect(current.type).toBe("directory");
       }
-      
+
       expect(current.children).toHaveLength(1);
       expect(current.children[0].name).toBe("deep.md");
+    });
+  });
+
+  describe("filemapToSidebar", () => {
+    let fileTree: Node;
+
+    beforeEach(() => {
+      // Create test file structure:
+      // /
+      // ├── index.md
+      // ├── readme.md
+      // ├── docs/
+      // │   ├── index.md
+      // │   ├── guide.md
+      // │   └── api/
+      // │       └── reference.md
+      // └── examples/
+      //     └── example.md
+
+      fs.writeFileSync(path.join(TEST_DIR, "index.md"), "# Root");
+      fs.writeFileSync(path.join(TEST_DIR, "readme.md"), "# README");
+
+      const docsDir = path.join(TEST_DIR, "docs");
+      fs.mkdirSync(docsDir);
+      fs.writeFileSync(path.join(docsDir, "index.md"), "# Docs Index");
+      fs.writeFileSync(path.join(docsDir, "guide.md"), "# Guide");
+
+      const apiDir = path.join(docsDir, "api");
+      fs.mkdirSync(apiDir);
+      fs.writeFileSync(path.join(apiDir, "reference.md"), "# API Reference");
+
+      const examplesDir = path.join(TEST_DIR, "examples");
+      fs.mkdirSync(examplesDir);
+      fs.writeFileSync(path.join(examplesDir, "example.md"), "# Example");
+
+      fileTree = getFileTree(TEST_DIR);
+    });
+
+    it("should convert empty tree to empty sidebar", () => {
+      fs.rmSync(TEST_DIR, { recursive: true });
+      fs.mkdirSync(TEST_DIR);
+
+      const emptyTree = getFileTree(TEST_DIR);
+      const sidebar = filemapToSidebar(emptyTree, []);
+
+      expect(sidebar).toEqual([]);
+    });
+
+    it("should list all files and folders with no expanded path", () => {
+      const sidebar = filemapToSidebar(fileTree, []);
+
+      // Should have: docs, examples, readme.md (3 top-level items)
+      // Plus nested items in docs and examples
+      expect(sidebar.length).toBeGreaterThan(0);
+
+      // Check top-level items
+      const topLevel = sidebar.filter(item => item.level === 0);
+      expect(topLevel.length).toBe(3);
+      expect(topLevel.map(i => i.name).sort()).toEqual(["docs", "examples", "readme.md"]);
+
+      // All should have empty parent
+      topLevel.forEach(item => {
+        expect(item.parent).toBe("");
+      });
+    });
+
+    it("should set correct item types", () => {
+      const sidebar = filemapToSidebar(fileTree, []);
+
+      const docsFolder = sidebar.find(item => item.name === "docs");
+      expect(docsFolder?.type).toBe("folder");
+
+      const readmeFile = sidebar.find(item => item.name === "readme.md");
+      expect(readmeFile?.type).toBe("file");
+    });
+
+    it("should set correct levels for nested items", () => {
+      const sidebar = filemapToSidebar(fileTree, []);
+
+      // Top level should be 0
+      const readme = sidebar.find(item => item.name === "readme.md");
+      expect(readme?.level).toBe(0);
+
+      // First level subdirectory should be 0
+      const docs = sidebar.find(item => item.name === "docs");
+      expect(docs?.level).toBe(0);
+
+      // Files inside docs should be 1
+      const guide = sidebar.find(item => item.name === "guide.md");
+      expect(guide?.level).toBe(1);
+
+      // api folder inside docs should be 1
+      const api = sidebar.find(item => item.name === "api");
+      expect(api?.level).toBe(1);
+
+      // Files inside api should be 2
+      const reference = sidebar.find(item => item.name === "reference.md");
+      expect(reference?.level).toBe(2);
+    });
+
+    it("should set correct parent names", () => {
+      const sidebar = filemapToSidebar(fileTree, []);
+
+      // Top level has empty parent
+      const readme = sidebar.find(item => item.name === "readme.md");
+      expect(readme?.parent).toBe("");
+
+      // Items in docs have "docs" as parent
+      const guide = sidebar.find(item => item.name === "guide.md");
+      expect(guide?.parent).toBe("docs");
+
+      // api folder has "docs" as parent
+      const api = sidebar.find(item => item.name === "api");
+      expect(api?.parent).toBe("docs");
+
+      // Items in api have "api" as parent
+      const reference = sidebar.find(item => item.name === "reference.md");
+      expect(reference?.parent).toBe("api");
+    });
+
+    it("should mark file as active when in expanded path", () => {
+      const sidebar = filemapToSidebar(fileTree, ["readme.md"]);
+
+      const readme = sidebar.find(item => item.name === "readme.md");
+      expect(readme?.active).toBe(true);
+
+      // Other items should not be active
+      const guide = sidebar.find(item => item.name === "guide.md");
+      expect(guide?.active).toBe(false);
+    });
+
+    it("should mark nested file as active", () => {
+      const sidebar = filemapToSidebar(fileTree, ["docs", "guide.md"]);
+
+      const guide = sidebar.find(item => item.name === "guide.md");
+      expect(guide?.active).toBe(true);
+
+      const readme = sidebar.find(item => item.name === "readme.md");
+      expect(readme?.active).toBe(false);
+    });
+
+    it("should expand folders in the path to active file", () => {
+      const sidebar = filemapToSidebar(fileTree, ["docs", "guide.md"]);
+
+      // docs folder should be expanded because it's in the path
+      const docs = sidebar.find(item => item.name === "docs");
+      expect(docs?.expanded).toBe(true);
+
+      // examples folder should not be expanded
+      const examples = sidebar.find(item => item.name === "examples");
+      expect(examples?.expanded).toBe(false);
+    });
+
+    it("should expand all folders in path to deeply nested file", () => {
+      const sidebar = filemapToSidebar(fileTree, ["docs", "api", "reference.md"]);
+
+      // Both docs and api should be expanded
+      const docs = sidebar.find(item => item.name === "docs");
+      expect(docs?.expanded).toBe(true);
+
+      const api = sidebar.find(item => item.name === "api");
+      expect(api?.expanded).toBe(true);
+
+      // reference.md should be active
+      const reference = sidebar.find(item => item.name === "reference.md");
+      expect(reference?.active).toBe(true);
+
+      // examples should not be expanded
+      const examples = sidebar.find(item => item.name === "examples");
+      expect(examples?.expanded).toBe(false);
+    });
+
+    it("should expand folder when viewing folder itself", () => {
+      const sidebar = filemapToSidebar(fileTree, ["docs"]);
+
+      // docs folder should be expanded
+      const docs = sidebar.find(item => item.name === "docs");
+      expect(docs?.expanded).toBe(true);
+    });
+
+    it("should not expand folders not in path", () => {
+      const sidebar = filemapToSidebar(fileTree, ["readme.md"]);
+
+      // No folders should be expanded
+      const docs = sidebar.find(item => item.name === "docs");
+      expect(docs?.expanded).toBe(false);
+
+      const examples = sidebar.find(item => item.name === "examples");
+      expect(examples?.expanded).toBe(false);
+
+      const api = sidebar.find(item => item.name === "api");
+      expect(api?.expanded).toBe(false);
+    });
+
+    it("should handle empty expanded path (viewing root)", () => {
+      const sidebar = filemapToSidebar(fileTree, []);
+
+      // No folders should be expanded
+      const allFolders = sidebar.filter(item => item.type === "folder");
+      allFolders.forEach(folder => {
+        expect(folder.expanded).toBe(false);
+      });
+
+      // No files should be active
+      const allFiles = sidebar.filter(item => item.type === "file");
+      allFiles.forEach(file => {
+        expect(file.active).toBe(false);
+      });
+    });
+
+    it("should preserve correct order of items", () => {
+      const sidebar = filemapToSidebar(fileTree, []);
+
+      // Find indices of key items
+      const docsIdx = sidebar.findIndex(item => item.name === "docs");
+      const guideIdx = sidebar.findIndex(item => item.name === "guide.md");
+      const apiIdx = sidebar.findIndex(item => item.name === "api");
+
+      // docs folder should come before its children
+      expect(docsIdx).toBeLessThan(guideIdx);
+      expect(docsIdx).toBeLessThan(apiIdx);
+    });
+
+    it("should set expanded to false for all files", () => {
+      const sidebar = filemapToSidebar(fileTree, ["docs", "guide.md"]);
+
+      const allFiles = sidebar.filter(item => item.type === "file");
+      allFiles.forEach(file => {
+        expect(file.expanded).toBe(false);
+      });
+    });
+
+    it("should handle single file in root", () => {
+      fs.rmSync(TEST_DIR, { recursive: true });
+      fs.mkdirSync(TEST_DIR);
+      fs.writeFileSync(path.join(TEST_DIR, "single.md"), "# Single");
+
+      const tree = getFileTree(TEST_DIR);
+      const sidebar = filemapToSidebar(tree, ["single.md"]);
+
+      expect(sidebar).toHaveLength(1);
+      expect(sidebar[0]).toEqual({
+        name: "single.md",
+        type: "file",
+        active: true,
+        parent: "",
+        expanded: false,
+        level: 0
+      });
+    });
+
+    it("should handle partial path match (should not expand if not full prefix)", () => {
+      const sidebar = filemapToSidebar(fileTree, ["examples", "example.md"]);
+
+      // docs should NOT be expanded (even though "d" could be seen as partial match)
+      const docs = sidebar.find(item => item.name === "docs");
+      expect(docs?.expanded).toBe(false);
+
+      // examples should be expanded
+      const examples = sidebar.find(item => item.name === "examples");
+      expect(examples?.expanded).toBe(true);
     });
   });
 });

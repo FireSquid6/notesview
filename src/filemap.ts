@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import type { SidebarItem } from "./frontend";
 
 export type Node = FileNode | DirectoryNode;
 
@@ -93,7 +94,7 @@ function getDirectoryChildren(directory: string): Node[] {
       nodes.push({
         type: "directory",
         children,
-        name: filename,
+        name: path.basename(filename, ".md"),
         content,
       });
     } else {
@@ -117,4 +118,64 @@ function getDirectoryChildren(directory: string): Node[] {
 
   }
   return nodes;
+}
+
+export function filemapToSidebar(root: Node, expandedPath: string[]): SidebarItem[] {
+  const items: SidebarItem[] = [];
+
+  function traverse(node: Node, currentPath: string[], level: number, parentName: string) {
+    if (node.type === "directory") {
+      if (node.name !== "") {
+        const nodePath = [...currentPath, node.name];
+        const isExpanded = isPrefixOf(nodePath, expandedPath);
+
+        items.push({
+          name: node.name,
+          type: "folder",
+          active: false,
+          parent: parentName,
+          expanded: isExpanded,
+          level: level
+        });
+      }
+
+      for (const child of node.children) {
+        const newPath = node.name === "" ? currentPath : [...currentPath, node.name];
+        const newParent = node.name === "" ? "" : node.name;
+        const newLevel = node.name === "" ? level : level + 1;
+        traverse(child, newPath, newLevel, newParent);
+      }
+    } else {
+      const nodePath = [...currentPath, node.name];
+      const isActive = pathsEqual(nodePath, expandedPath);
+
+      items.push({
+        name: node.name,
+        type: "file",
+        active: isActive,
+        parent: parentName,
+        expanded: false,
+        level: level
+      });
+    }
+  }
+
+  traverse(root, [], 0, "");
+  return items;
+}
+
+function isPrefixOf(prefix: string[], path: string[]): boolean {
+  if (prefix.length > path.length) return false;
+  for (let i = 0; i < prefix.length; i++) {
+    if (prefix[i] !== path[i]) return false;
+  }
+  return true;
+}
+
+function pathsEqual(path1: string[], path2: string[]): boolean {
+  if (path1.length !== path2.length) return false;
+  for (let i = 0; i < path1.length; i++) {
+    if (path1[i] !== path2[i]) return false;
+  }
+  return true;
 }
