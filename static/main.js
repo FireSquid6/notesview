@@ -30,6 +30,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Initialize chevron states based on details open state
+  function syncChevronStates() {
+    document.querySelectorAll('details').forEach(details => {
+      const summary = details.querySelector('summary');
+      const chevron = summary?.querySelector('.folder-chevron');
+      
+      if (chevron && summary) {
+        const isOpen = details.open;
+        summary.classList.toggle('expanded', isOpen);
+        chevron.textContent = isOpen ? '▼' : '▶';
+      }
+    });
+  }
+
+  // Sync states on page load
+  syncChevronStates();
+
   // Handle folder expansion and navigation
   document.addEventListener('click', function(e) {
     // Check if the click is directly on the chevron element
