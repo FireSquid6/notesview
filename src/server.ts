@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { renderHtml } from "./renderer";
 import { getPage, jsxToHtml } from "./frontend";
-import { filemapToSidebar, getFileTree, matchFilePath } from "./filemap";
+import { filemapToSidebar, getFileTree, matchFilePath, printFilemap } from "./filemap";
 
 
 export interface ServeOptions {
@@ -24,7 +24,7 @@ export const packageFiles: Record<string, string> = {
 
 export function serveDirectory({ port, directory }: ServeOptions) {
   const ft = getFileTree(directory);
-  console.log(ft);
+  printFilemap(ft);
 
   new Elysia()
     .state("filetree", ft)
@@ -38,7 +38,6 @@ export function serveDirectory({ port, directory }: ServeOptions) {
         "static",
         split.join("/"),
       );
-      console.log(filepath);
 
       if (!fs.existsSync(filepath)) {
         return ctx.status(404);
@@ -82,7 +81,6 @@ export function serveDirectory({ port, directory }: ServeOptions) {
       while (pathParts[0] === "") {
         pathParts.shift();
       }
-      console.log(pathParts);
       // TODO - ensure path parts actually starts
       const contentData = matchFilePath(pathParts, ctx.store.filetree);
 

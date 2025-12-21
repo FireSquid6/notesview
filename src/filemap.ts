@@ -179,3 +179,21 @@ function pathsEqual(path1: string[], path2: string[]): boolean {
   }
   return true;
 }
+
+export function printFilemap(node: Node, indent: string = ""): void {
+  if (node.type === "directory") {
+    if (node.name !== "") {
+      console.log(`${indent}📁 ${node.name}/`);
+      const nextIndent = indent + "  ";
+      for (const child of node.children) {
+        printFilemap(child, nextIndent);
+      }
+    } else {
+      for (const child of node.children) {
+        printFilemap(child, indent);
+      }
+    }
+  } else {
+    console.log(`${indent}📄 ${node.name}`);
+  }
+}
