@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { renderHtml } from "./renderer";
 import { getPage, jsxToHtml } from "./frontend";
+import { getFileTree, matchFilePath } from "./filemap";
 
 
 export interface ServeOptions {
@@ -23,6 +24,7 @@ export const packageFiles: Record<string, string> = {
 
 export function serveDirectory({ port, directory }: ServeOptions) {
   new Elysia()
+    .state("filetree", getFileTree(directory))
     .get(`${MDSERVE_ROUTE}/*`, (ctx) => {
       const split = ctx.path.split("/");
       split.shift();
@@ -72,30 +74,27 @@ export function serveDirectory({ port, directory }: ServeOptions) {
 
     })
     .get("/*", async (ctx) => {
-      const filepathOptions = [
-        path.join(directory, `${ctx.path}.md`),
-        path.join(directory, ctx.path, "index.md"),
-      ]
+      const pathParts = ctx.path.split("/");
+      // TODO - ensure path parts actually starts
+      const contentData = matchFilePath(pathParts, ctx.store.filetree);
 
-      let filepath = "";
-      for (const fp of filepathOptions) {
-        // TODO - build a better filepath system
-        if (fs.existsSync(fp)) {
-          filepath = fp;
-          break;
-        }
-      }
-
-      if (filepath === "") {
+      if (contentData === null) {
+        // TODO - 404 page
         return ctx.status(404);
       }
 
-      const text = fs.readFileSync(filepath).toString();
+      if (contentData.type === "directory-listing") {
+        // TODO - directory listing
+        return ctx.status(404);
+      }
+
+      const text = fs.readFileSync(contentData.filepath).toString();
       const content = await renderHtml(text);
-      const filename = path.basename(filepath);
+      const filename = path.basename(contentData.filepath);
 
 
       const page = getPage({
+        sidebar: [],
         content,
         filename,
       });

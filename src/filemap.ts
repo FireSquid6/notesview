@@ -7,8 +7,8 @@ export type ContentData = {
   type: "markdown-file";
   filepath: string;
 } | {
-    type: "directory-listing";
-  }
+  type: "directory-listing";
+}
 
 export type FileNode = {
   type: "file";
@@ -32,8 +32,8 @@ export function getFileTree(rootDirectory: string): Node {
     type: "markdown-file",
     filepath: indexFile,
   } : {
-      type: "directory-listing",
-    }
+    type: "directory-listing",
+  }
 
   return {
     type: "directory",
@@ -44,7 +44,7 @@ export function getFileTree(rootDirectory: string): Node {
 }
 
 // null indicates that the file path was not found
-export function matchFilePath(parts: string[], root: Node): ContentData | null{
+export function matchFilePath(parts: string[], root: Node): ContentData | null {
   if (parts.length === 0) {
     return root.content;
   }
@@ -87,8 +87,8 @@ function getDirectoryChildren(directory: string): Node[] {
         type: "markdown-file",
         filepath: indexPath,
       } : {
-          type: "directory-listing",
-        }
+        type: "directory-listing",
+      }
 
       nodes.push({
         type: "directory",
