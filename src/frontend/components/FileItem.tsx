@@ -14,16 +14,16 @@ export function FileItem({ node, currentPath, activePath, level, parentPath }: F
   
   if (node.type === "directory") {
     const isExpanded = isPrefixOf(nodePath, activePath);
+    const href = pathString ? `/${encodeURIComponent(pathString)}` : "/";
     
     return (
-      <>
-        <div class={`file-item folder-item ${isExpanded ? 'expanded' : ''}`} 
-             data-folder={node.name} 
-             style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}>
+      <details open={isExpanded}>
+        <summary class={`file-item folder-item ${isExpanded ? 'expanded' : ''}`} 
+                 style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}>
           <span class="folder-chevron">{isExpanded ? '▼' : '▶'}</span>
           <span class="file-icon">📁</span>
-          <span class="file-name">{node.name}</span>
-        </div>
+          <a href={href} class="file-name folder-link">{node.name}</a>
+        </summary>
         {node.children.map((child) => (
           <FileItem 
             node={child} 
@@ -33,7 +33,7 @@ export function FileItem({ node, currentPath, activePath, level, parentPath }: F
             parentPath={nodePath}
           />
         ))}
-      </>
+      </details>
     );
   } else {
     const isActive = pathsEqual(nodePath, activePath);

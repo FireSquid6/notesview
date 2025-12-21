@@ -1,6 +1,8 @@
 
 # To Do
-- [ ] proper styling
+- [x] proper styling
 - [ ] following links correctly
-- [ ] fix the math stuff
-- [ ] sidebar
+- [x] fix the math stuff
+- [x] sidebar
+- [ ] work with spaces correctly
+- [ ] directory listing page

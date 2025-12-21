@@ -184,15 +184,27 @@ body {
 .folder-item {
   cursor: pointer;
   user-select: none;
+  display: flex;
+  align-items: center;
 }
 
 .folder-chevron {
   margin-right: 0.5rem;
   font-size: 0.75rem;
   color: #a1a1aa;
-  transition: transform 0.2s;
-  width: 12px;
-  display: inline-block;
+  transition: all 0.2s;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.folder-chevron:hover {
+  background-color: #3f3f46;
+  color: #fafafa;
 }
 
 .folder-item.expanded .folder-chevron {
@@ -201,6 +213,45 @@ body {
 
 .folder-item:not(.expanded) .folder-chevron {
   transform: rotate(-90deg);
+}
+
+/* Details/Summary styling for expandable folders */
+details {
+  margin: 0;
+}
+
+details summary {
+  list-style: none;
+  outline: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::-moz-details-marker {
+  display: none;
+}
+
+/* Folder links */
+.folder-link {
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  flex-grow: 1;
+}
+
+.folder-link:hover {
+  text-decoration: none;
+  color: inherit;
+  background-color: #27272a;
+}
+
+.folder-link:visited {
+  color: inherit;
 }
 
 /* Content Wrapper */

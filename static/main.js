@@ -30,25 +30,27 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  document.querySelectorAll('.folder-item').forEach(folder => {
-    folder.addEventListener('click', function(e) {
+  // Handle folder expansion and navigation
+  document.addEventListener('click', function(e) {
+    // Check if the click is directly on the chevron element
+    if (e.target.classList.contains('folder-chevron')) {
+      // Clicking directly on chevron - toggle expansion
       e.preventDefault();
-      const expanded = this.classList.contains('expanded');
-
-      this.classList.toggle('expanded');
-
-      const chevron = this.querySelector('.folder-chevron');
-      if (chevron) {
-        chevron.textContent = expanded ? '▶' : '▼';
+      e.stopPropagation();
+      
+      const summary = e.target.closest('summary');
+      const details = summary.closest('details');
+      
+      if (details) {
+        details.open = !details.open;
+        
+        // Update chevron and expanded class
+        const expanded = details.open;
+        summary.classList.toggle('expanded', expanded);
+        e.target.textContent = expanded ? '▼' : '▶';
       }
-
-      document.querySelectorAll(`[data-parent="\${folderName}"]`).forEach(child => {
-        if (expanded) {
-          child.style.display = 'none';
-        } else {
-          child.style.display = 'flex';
-        }
-      });
-    });
+    }
+    // For all other clicks on summary (including folder link), let default behavior happen
+    // This means clicking anywhere else will follow the link
   });
 });
