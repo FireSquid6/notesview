@@ -31,7 +31,6 @@ export function DirectoryListing({ node, currentPath }: DirectoryListingProps): 
           <div class="directory-listing-grid">
             {node.children.map((child) => (
               <DirectoryItem 
-                key={child.name}
                 node={child} 
                 currentPath={currentPath}
               />
