@@ -17,21 +17,6 @@ export interface SidebarItem {
 
 
 export function getPage({ content, filename, sidebar }: PageOptions): JSX.Element {
-  const dummyFiles = [
-    { name: "README.md", type: "file", active: filename === "README.md", level: 0 },
-    { name: "docs", type: "folder", expanded: true, level: 0 },
-    { name: "getting-started.md", type: "file", active: filename === "getting-started.md", level: 1, parent: "docs" },
-    { name: "api-reference.md", type: "file", active: filename === "api-reference.md", level: 1, parent: "docs" },
-    { name: "src", type: "folder", expanded: true, level: 0 },
-    { name: "index.js", type: "file", active: filename === "index.js", level: 1, parent: "src" },
-    { name: "components", type: "folder", expanded: false, level: 1, parent: "src" },
-    { name: "Button.jsx", type: "file", active: filename === "Button.jsx", level: 2, parent: "components" },
-    { name: "utils", type: "folder", expanded: true, level: 1, parent: "src" },
-    { name: "helpers.js", type: "file", active: filename === "helpers.js", level: 2, parent: "utils" },
-    { name: "package.json", type: "file", active: filename === "package.json", level: 0 },
-    { name: "CHANGELOG.md", type: "file", active: filename === "CHANGELOG.md", level: 0 }
-  ];
-
   return (
     <html>
       <head>
@@ -75,7 +60,7 @@ export function getPage({ content, filename, sidebar }: PageOptions): JSX.Elemen
                       </div>
                     );
                   } else {
-                    const isVisible = !file.parent || dummyFiles.find(f => f.name === file.parent && f.type === 'folder')?.expanded;
+                    const isVisible = !file.parent || sidebar.find(f => f.name === file.parent && f.type === 'folder')?.expanded;
                     const filePath = file.parent ? `${file.parent}/${file.name}` : file.name;
                     return (
                       <a href={`/${encodeURIComponent(filePath)}`} 
