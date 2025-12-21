@@ -1,24 +1,26 @@
-import type { SidebarItem } from "../index";
+import type { Node } from "../../filemap";
 import { FileItem } from "./FileItem";
 
 interface SidebarProps {
-  sidebar: SidebarItem[];
+  fileTree: Node;
+  activePath: string[];
 }
 
-export function Sidebar({ sidebar }: SidebarProps): JSX.Element {
+export function Sidebar({ fileTree, activePath }: SidebarProps): JSX.Element {
+
   return (
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <h3>Files</h3>
       </div>
       <nav class="file-list">
-        <a href="/" class="file-item file-link home-link">
-          <span class="file-icon">🏠</span>
-          <span class="file-name">Home</span>
-        </a>
-        {sidebar.map((file) => (
-          <FileItem file={file} sidebar={sidebar} />
-        ))}
+        <FileItem
+          node={fileTree}
+          currentPath={[]}
+          activePath={activePath}
+          level={0}
+          parentPath={[]}
+        />
       </nav>
     </aside>
   );

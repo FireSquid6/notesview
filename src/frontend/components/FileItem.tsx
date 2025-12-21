@@ -1,33 +1,66 @@
-import type { SidebarItem } from "../index";
+import type { Node } from "../../filemap";
 
 interface FileItemProps {
-  file: SidebarItem;
-  sidebar: SidebarItem[];
+  node: Node;
+  currentPath: string[];
+  activePath: string[];
+  level: number;
+  parentPath: string[];
 }
 
-export function FileItem({ file, sidebar }: FileItemProps): JSX.Element {
-  if (file.type === 'folder') {
+export function FileItem({ node, currentPath, activePath, level, parentPath }: FileItemProps): JSX.Element {
+  const nodePath = [...currentPath, node.name];
+  const pathString = nodePath.filter(p => p !== "").join("/");
+  
+  if (node.type === "directory") {
+    const isExpanded = isPrefixOf(nodePath, activePath);
+    
     return (
-      <div class={`file-item folder-item ${file.expanded ? 'expanded' : ''}`} data-folder={file.name} style={{ paddingLeft: `${file.level * 1.5 + 0.75}rem` }}>
-        <span class="folder-chevron">{file.expanded ? '▼' : '▶'}</span>
-        <span class="file-icon">📁</span>
-        <span class="file-name">{file.name}</span>
-      </div>
+      <>
+        <div class={`file-item folder-item ${isExpanded ? 'expanded' : ''}`} 
+             data-folder={node.name} 
+             style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}>
+          <span class="folder-chevron">{isExpanded ? '▼' : '▶'}</span>
+          <span class="file-icon">📁</span>
+          <span class="file-name">{node.name}</span>
+        </div>
+        {node.children.map((child) => (
+          <FileItem 
+            node={child} 
+            currentPath={nodePath} 
+            activePath={activePath} 
+            level={level + 1} 
+            parentPath={nodePath}
+          />
+        ))}
+      </>
     );
   } else {
-    const isVisible = !file.parent || sidebar.find(f => f.name === file.parent && f.type === 'folder')?.expanded;
-    const filePath = file.parent ? `${file.parent}/${file.name}` : file.name;
+    const isActive = pathsEqual(nodePath, activePath);
+    
     return (
-      <a href={`/${encodeURIComponent(filePath)}`}
-        class={`file-item file-link ${file.active ? 'active' : ''}`}
-        data-parent={file.parent}
-        style={{
-          paddingLeft: `${file.level * 1.5 + 0.75}rem`,
-          display: isVisible ? 'flex' : 'none'
-        }}>
+      <a href={`/${pathString}`}
+         class={`file-item file-link ${isActive ? 'active' : ''}`}
+         style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}>
         <span class="file-icon">📄</span>
-        <span class="file-name">{file.name}</span>
+        <span class="file-name">{node.name}</span>
       </a>
     );
   }
+}
+
+function isPrefixOf(prefix: string[], path: string[]): boolean {
+  if (prefix.length > path.length) return false;
+  for (let i = 0; i < prefix.length; i++) {
+    if (prefix[i] !== path[i]) return false;
+  }
+  return true;
+}
+
+function pathsEqual(path1: string[], path2: string[]): boolean {
+  if (path1.length !== path2.length) return false;
+  for (let i = 0; i < path1.length; i++) {
+    if (path1[i] !== path2[i]) return false;
+  }
+  return true;
 }

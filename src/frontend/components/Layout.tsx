@@ -1,15 +1,16 @@
 import { MDSERVE_ROUTE, PACKAGE_FILES_PREFIX } from "../../server";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import type { SidebarItem } from "../index";
+import type { Node } from "@/filemap";
 
 interface LayoutProps {
   filename: string;
-  sidebar: SidebarItem[];
+  filetree: Node;
   children: JSX.Element;
+  activePath: string[];
 }
 
-export function Layout({ filename, sidebar, children }: LayoutProps): JSX.Element {
+export function Layout({ filename, filetree, children, activePath }: LayoutProps): JSX.Element {
   return (
     <html>
       <head>
@@ -27,7 +28,7 @@ export function Layout({ filename, sidebar, children }: LayoutProps): JSX.Elemen
         <div class="app-layout">
           <Header filename={filename} />
           <div class="main-layout">
-            <Sidebar sidebar={sidebar} />
+            <Sidebar fileTree={filetree} activePath={activePath} />
             <main class="content-wrapper">
               <div class="content">
                 {children}

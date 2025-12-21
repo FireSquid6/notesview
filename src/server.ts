@@ -97,11 +97,11 @@ export function serveDirectory({ port, directory }: ServeOptions) {
       const text = fs.readFileSync(contentData.filepath).toString();
       const content = await renderHtml(text);
       const filename = path.basename(contentData.filepath);
-      const sidebar = filemapToSidebar(ctx.store.filetree, pathParts);
 
 
       const page = getPage({
-        sidebar,
+        filetree: ctx.store.filetree,
+        activePath: pathParts,
         content,
         filename,
       });
