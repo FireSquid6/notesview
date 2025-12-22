@@ -5,15 +5,18 @@ interface FileItemProps {
   currentPath: string[];
   activePath: string[];
   level: number;
-  parentPath: string[];
 }
 
-export function FileItem({ node, currentPath, activePath, level, parentPath }: FileItemProps): JSX.Element {
+export function FileItem({ node, currentPath, activePath, level }: FileItemProps): JSX.Element {
   const nodePath = [...currentPath, node.name];
   const pathString = nodePath.filter(p => p !== "").join("/");
   
   if (node.type === "directory") {
     const isExpanded = isPrefixOf(nodePath, activePath);
+    if (isExpanded) {
+      console.log(`${currentPath} is expanded`);
+    }
+    console.log(activePath);
     const href = pathString ? `/${encodeURIComponent(pathString)}` : "/";
     
     return (
@@ -30,7 +33,6 @@ export function FileItem({ node, currentPath, activePath, level, parentPath }: F
             currentPath={nodePath} 
             activePath={activePath} 
             level={level + 1} 
-            parentPath={nodePath}
           />
         ))}
       </details>

@@ -19,7 +19,6 @@ export function Sidebar({ fileTree, activePath }: SidebarProps): JSX.Element {
           currentPath={[]}
           activePath={activePath}
           level={0}
-          parentPath={[]}
         />
       </nav>
     </aside>
