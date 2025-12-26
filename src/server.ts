@@ -2,17 +2,19 @@ import { Elysia } from "elysia";
 import fs from "fs";
 import path from "path";
 import { renderHtml } from "./renderer";
-import { getContentPage, getDirectoryPage, jsxToHtml } from "./frontend";
-import { getFileTree, matchFilePath, printFilemap } from "./filemap";
+import { getContentPage, getDirectoryPage, getSidebarForPage, jsxToHtml } from "./frontend";
+import { getFileTree, matchFilePath, printFilemap as printFiletree } from "./filemap";
 
 
 export interface ServeOptions {
   port: number;
   directory: string;
+  watchForUpdates: boolean;
 }
 
 export const MDSERVE_ROUTE = "/__mdserve"
 export const PACKAGE_FILES_PREFIX = "/__packagefiles";
+
 
 export const packageFiles: Record<string, string> = {
   "highlight.css": "node_modules/highlight.js/styles/tokyo-night-dark.css",
@@ -22,11 +24,11 @@ export const packageFiles: Record<string, string> = {
   "tailwind.css": "node_modules/tailwindcss/index.css",
 }
 
-export function serveDirectory({ port, directory }: ServeOptions) {
+export function serveDirectory({ port, directory, watchForUpdates }: ServeOptions) {
   const ft = getFileTree(directory);
-  printFilemap(ft);
+  printFiletree(ft);
 
-  new Elysia()
+  const app = new Elysia()
     .state("filetree", ft)
     .get(`${MDSERVE_ROUTE}/*`, (ctx) => {
       const split = ctx.path.split("/");
@@ -75,6 +77,43 @@ export function serveDirectory({ port, directory }: ServeOptions) {
       return ctx.status(200, Bun.file(filepath));
 
     })
+    .get("/__partials/*", async (ctx) => {
+      const pathParts = decodeURI(ctx.path).split("/");
+
+      while (pathParts[0] === "" || pathParts[0] === "__partials") {
+        pathParts.shift();
+      }
+      // TODO - ensure path parts actually starts
+      const contentData = matchFilePath(pathParts, ctx.store.filetree);
+
+      if (contentData === null) {
+        return ctx.status(404);
+      }
+
+      ctx.set.headers["content-type"] = "text/plain";
+      if (contentData.type === "directory-listing") {
+        return ctx.status(200, "NO_UPDATE");
+      } else {
+        const text = fs.readFileSync(contentData.filepath).toString();
+        const content = await renderHtml(text);
+
+        return ctx.status(200, content);
+      }
+
+    })
+    .get("/__only-sidebar/*", async (ctx) => {
+      const pathParts = decodeURI(ctx.path).split("/");
+
+      while (pathParts[0] === "" || pathParts[0] === "__partials") {
+        pathParts.shift();
+      }
+      
+      const sidebar = getSidebarForPage(ctx.store.filetree, pathParts);
+
+      ctx.set.headers["content-type"] = "text/plain";
+      return ctx.status(200, sidebar);
+
+    })
     .get("/*", async (ctx) => {
       const pathParts = decodeURI(ctx.path).split("/");
 
@@ -121,6 +160,16 @@ export function serveDirectory({ port, directory }: ServeOptions) {
     .listen(port, () => {
       console.log(`Listening on port ${port}`);
     })
+  
+  if (watchForUpdates) {
+    fs.watch(directory, { recursive: true }, () => {
+      const filetree = getFileTree(directory);
+      console.log("\nUpdated:")
+      printFiletree(filetree);
+      app.store.filetree = filetree;
+
+    });
+  }
 }
 
 

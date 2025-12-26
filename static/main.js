@@ -1,3 +1,43 @@
+function getCurrentPath() {
+  return window.location.pathname.slice(1);
+}
+
+async function refreshSidebar() {
+  const response = await fetch(`/__only-sidebar/${getCurrentPath()}`);
+  const html = await response.text();
+  const element = document.getElementById("sidebar-container");
+
+  console.log(html);
+  element.innerHTML = html;
+
+}
+
+async function refreshContent() {
+  const response = await fetch(`/__partials/${getCurrentPath()}`);
+  const html = await response.text();
+  console.log(html);
+  if (html === "NO_UPDATE") {
+    return;
+  }
+
+  const element = document.getElementById("content-container");
+  element.innerHTML = html;
+}
+
+function refreshPage() {
+  refreshSidebar();
+  refreshContent();
+}
+
+document.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    console.log("Enter pressed");
+    refreshPage();
+  }
+})
+
+
 
 document.addEventListener('DOMContentLoaded', function() {
   const sidebarToggle = document.getElementById('sidebar-toggle');
@@ -30,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Initialize chevron states based on details open state
   function syncChevronStates() {
     document.querySelectorAll('details').forEach(details => {
       const summary = details.querySelector('summary');
@@ -44,14 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Sync states on page load
   syncChevronStates();
 
-  // Handle folder expansion and navigation
   document.addEventListener('click', function(e) {
-    // Check if the click is directly on the chevron element
     if (e.target.classList.contains('folder-chevron')) {
-      // Clicking directly on chevron - toggle expansion
       e.preventDefault();
       e.stopPropagation();
       
@@ -60,14 +95,11 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (details) {
         details.open = !details.open;
-        
-        // Update chevron and expanded class
         const expanded = details.open;
         summary.classList.toggle('expanded', expanded);
         e.target.textContent = expanded ? '▼' : '▶';
       }
     }
-    // For all other clicks on summary (including folder link), let default behavior happen
-    // This means clicking anywhere else will follow the link
   });
 });
+
