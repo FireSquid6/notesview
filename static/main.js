@@ -7,7 +7,6 @@ async function refreshSidebar() {
   const html = await response.text();
   const element = document.getElementById("sidebar-container");
 
-  console.log(html);
   element.innerHTML = html;
 
 }
@@ -15,7 +14,6 @@ async function refreshSidebar() {
 async function refreshContent() {
   const response = await fetch(`/__partials/${getCurrentPath()}`);
   const html = await response.text();
-  console.log(html);
   if (html === "NO_UPDATE") {
     return;
   }
@@ -29,14 +27,16 @@ function refreshPage() {
   refreshContent();
 }
 
-document.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    console.log("Enter pressed");
+
+function setupWebsocket() {
+  const socket = new WebSocket("/__update-listener")
+  socket.onmessage = () => {
     refreshPage();
   }
-})
-
+  socket.onerror = () => {
+    console.log(`Websocket failed. Refresh the page to fix it`)
+  }
+}
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -101,5 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
+
+  setupWebsocket();
 });
 

@@ -157,7 +157,7 @@ export function serveDirectory({ port, directory, watchForUpdates }: ServeOption
       }
 
     })
-    .ws("/__update_listener", {
+    .ws("/__update-listener", {
       open(ws) {
         ws.subscribe("updates");
       },
