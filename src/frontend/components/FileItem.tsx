@@ -7,16 +7,17 @@ interface FileItemProps {
   level: number;
 }
 
+
 export function FileItem({ node, currentPath, activePath, level }: FileItemProps): JSX.Element {
   const nodePath = [...currentPath, node.name];
   const pathString = nodePath.filter(p => p !== "").join("/");
+
+  while (nodePath[0] === "") {
+    nodePath.shift();
+  }
   
   if (node.type === "directory") {
     const isExpanded = isPrefixOf(nodePath, activePath);
-    if (isExpanded) {
-      console.log(`${currentPath} is expanded`);
-    }
-    console.log(activePath);
     const href = pathString ? `/${encodeURIComponent(pathString)}` : "/";
     
     return (
@@ -52,10 +53,20 @@ export function FileItem({ node, currentPath, activePath, level }: FileItemProps
 }
 
 function isPrefixOf(prefix: string[], path: string[]): boolean {
-  if (prefix.length > path.length) return false;
-  for (let i = 0; i < prefix.length; i++) {
-    if (prefix[i] !== path[i]) return false;
+  if (prefix.length === 0) {
+    return true;
   }
+
+  if (prefix.length > path.length) {
+    return false;
+  }
+
+  for (let i = 0; i < prefix.length; i++) {
+    if (prefix[i] !== path[i]) {
+      return false;
+    }
+  }
+
   return true;
 }
 
