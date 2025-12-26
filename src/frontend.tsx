@@ -1,15 +1,22 @@
 import type { Node } from "./filemap";
 import { Layout } from "./frontend/components/Layout";
+import { NoIndexDirectory } from "./frontend/components/NoIndexDirectory";
 
-export interface PageOptions {
+export interface ContentPageOptions {
   content: string;
   filename: string;
   filetree: Node
   activePath: string[];
 }
 
+export interface DirectoryPageOptions {
+  directoryName: string;
+  filetree: Node;
+  activePath: string[];
+}
 
-export function getPage({ content, filename, filetree, activePath }: PageOptions): JSX.Element {
+
+export function getContentPage({ content, filename, filetree, activePath }: ContentPageOptions): JSX.Element {
   return (
     <Layout 
       filetree={filetree}
@@ -21,6 +28,20 @@ export function getPage({ content, filename, filetree, activePath }: PageOptions
   )
 }
 
+
+export function getDirectoryPage({ filetree, directoryName, activePath }: DirectoryPageOptions): JSX.Element {
+  return (
+    <Layout
+      filename={directoryName}
+      filetree={filetree}
+      activePath={activePath}
+    >
+      <NoIndexDirectory 
+        title={directoryName}
+      />
+    </Layout>
+  )
+}
 
 export function jsxToHtml(jsx: JSX.Element): string {
   return `<!DOCTYPE HTML>\n${jsx}`;

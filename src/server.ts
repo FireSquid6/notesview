@@ -2,8 +2,8 @@ import { Elysia } from "elysia";
 import fs from "fs";
 import path from "path";
 import { renderHtml } from "./renderer";
-import { getPage, jsxToHtml } from "./frontend";
-import { filemapToSidebar, getFileTree, matchFilePath, printFilemap } from "./filemap";
+import { getContentPage, getDirectoryPage, jsxToHtml } from "./frontend";
+import { getFileTree, matchFilePath, printFilemap } from "./filemap";
 
 
 export interface ServeOptions {
@@ -88,27 +88,34 @@ export function serveDirectory({ port, directory }: ServeOptions) {
         // TODO - 404 page
         return ctx.status(404);
       }
-
-      if (contentData.type === "directory-listing") {
-        // TODO - directory listing
-        return ctx.status(500);
-      }
-
-      const text = fs.readFileSync(contentData.filepath).toString();
-      const content = await renderHtml(text);
       const filename = path.basename(contentData.filepath);
 
+      if (contentData.type === "directory-listing") {
+        const page = getDirectoryPage({
+          filetree: ctx.store.filetree,
+          activePath: pathParts,
+          directoryName: filename,
+        });
 
-      const page = getPage({
-        filetree: ctx.store.filetree,
-        activePath: pathParts,
-        content,
-        filename,
-      });
-      const html = jsxToHtml(page);
+        const html = jsxToHtml(page);
+        ctx.set.headers["content-type"] = "text/html";
+        return ctx.status(200, html);
+      } else {
+        const text = fs.readFileSync(contentData.filepath).toString();
+        const content = await renderHtml(text);
 
-      ctx.set.headers["content-type"] = "text/html";
-      return ctx.status(200, html);
+
+        const page = getContentPage({
+          filetree: ctx.store.filetree,
+          activePath: pathParts,
+          content,
+          filename,
+        });
+        const html = jsxToHtml(page);
+
+        ctx.set.headers["content-type"] = "text/html";
+        return ctx.status(200, html);
+      }
 
     })
     .listen(port, () => {

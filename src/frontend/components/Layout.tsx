@@ -29,11 +29,11 @@ export function Layout({ filename, filetree, children, activePath }: LayoutProps
           <Header filename={filename} />
           <div class="main-layout">
             <Sidebar fileTree={filetree} activePath={activePath} />
-            <main class="content-wrapper">
-              <div class="content">
+            <div class="content-wrapper">
+              <main class="content">
                 {children}
-              </div>
-            </main>
+              </main>
+            </div>
           </div>
         </div>
       </body>

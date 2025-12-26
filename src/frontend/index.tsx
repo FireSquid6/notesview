@@ -1,26 +1,24 @@
-import { Layout } from "./components/Layout";
+import type { Node } from "./filemap";
+import { Layout } from "./frontend/components/Layout";
 
 export interface PageOptions {
   content: string;
   filename: string;
-  sidebar: SidebarItem[];
+  filetree: Node
+  activePath: string[];
 }
 
-export interface SidebarItem {
-  name: string;
-  type: "file" | "folder";
-  active: boolean;
-  parent: string;
-  expanded: boolean;
-  level: number;
-}
 
-export function getPage({ content, filename, sidebar }: PageOptions): JSX.Element {
+export function getPage({ content, filename, filetree, activePath }: PageOptions): JSX.Element {
   return (
-    <Layout filename={filename} sidebar={sidebar}>
+    <Layout 
+      filetree={filetree}
+      filename={filename}
+      activePath={activePath}
+    >
       {content}
-    </Layout>
-  );
+      </Layout>
+  )
 }
 
 

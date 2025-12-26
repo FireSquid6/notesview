@@ -8,6 +8,7 @@ export type ContentData = {
   filepath: string;
 } | {
   type: "directory-listing";
+  filepath: string;
 }
 
 export type FileNode = {
@@ -33,6 +34,7 @@ export function getFileTree(rootDirectory: string): Node {
     filepath: indexFile,
   } : {
     type: "directory-listing",
+    filepath: "root",
   }
 
   return {
@@ -88,6 +90,7 @@ function getDirectoryChildren(directory: string): Node[] {
         filepath: indexPath,
       } : {
         type: "directory-listing",
+        filepath: filepath,
       }
 
       nodes.push({
