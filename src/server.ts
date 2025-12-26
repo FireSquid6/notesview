@@ -5,6 +5,9 @@ import { renderHtml } from "./renderer";
 import { getContentPage, getDirectoryPage, getSidebarForPage, jsxToHtml } from "./frontend";
 import { getFileTree, matchFilePath, printFilemap as printFiletree } from "./filemap";
 
+import jsSource from "../static/main.text.js";
+import cssSource from "../static/main.text.css";
+
 
 export interface ServeOptions {
   port: number;
@@ -30,23 +33,13 @@ export function serveDirectory({ port, directory, watchForUpdates }: ServeOption
 
   const app = new Elysia()
     .state("filetree", ft)
-    .get(`${MDSERVE_ROUTE}/*`, (ctx) => {
-      const split = ctx.path.split("/");
-      split.shift();
-      split.shift();
-      const filepath = path.resolve(
-        __dirname,
-        "..",
-        "static",
-        split.join("/"),
-      );
-
-      if (!fs.existsSync(filepath)) {
-        return ctx.status(404);
-      }
-
-      return ctx.status(200, Bun.file(filepath));
-
+    .get(`${MDSERVE_ROUTE}/main.js`, (ctx) => {
+      ctx.set.headers["content-type"] = "text/javascript";
+      return ctx.status(200, jsSource);
+    })
+    .get(`${MDSERVE_ROUTE}/main.css`, (ctx) => {
+      ctx.set.headers["content-type"] = "text/css";
+      return ctx.status(200, cssSource);
     })
     .get(`${PACKAGE_FILES_PREFIX}/fonts/*`, async (ctx)=> {
       const fontName = ctx.path.split("/").pop()!;
