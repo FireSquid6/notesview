@@ -157,21 +157,48 @@ export function serveDirectory({ port, directory, watchForUpdates }: ServeOption
       }
 
     })
+    .ws("/__update_listener", {
+      open(ws) {
+        ws.subscribe("updates");
+      },
+      close(ws) {
+        ws.unsubscribe("updates");
+      }
+    })
     .listen(port, () => {
       console.log(`Listening on port ${port}`);
     })
   
   if (watchForUpdates) {
-    fs.watch(directory, { recursive: true }, () => {
+    const updater = timeoutRun(() => {
       const filetree = getFileTree(directory);
       console.log("\nUpdated:")
       printFiletree(filetree);
-      app.store.filetree = filetree;
 
+      app.store.filetree = filetree;
+      app.server!.publish("updates", "UPDATE");
+
+    }, 1000);
+
+    fs.watch(directory, { recursive: true }, () => {
+      updater();
     });
   }
 }
 
 
+function timeoutRun<T extends (...args: any[]) => any>(
+  f: T,
+  t: number
+): (...args: Parameters<T>) => void {
+  let lastCallTime = 0;
 
+  return function(...args: Parameters<T>) {
+    const now = Date.now();
+    if (now - lastCallTime >= t) {
+      lastCallTime = now;
+      f(...args);
+    }
+  };
+}
 

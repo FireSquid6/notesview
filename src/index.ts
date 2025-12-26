@@ -10,10 +10,12 @@ const program = new Command()
   .requiredOption("-d, --directory <dir>", "The directory to serve")
   .option("--only-markdown", "Whether to only serve markdown files")
   .option("-p, --port <port>", "The port to serve on", "4242")
+  .option("-w, --watch", "Whether to watch the directory for changes or not")
   .action((opts) => {
     const options: ServeOptions = {
       directory: opts.directory,
       port: parseInt(opts.port),
+      watchForUpdates: opts.watch ?? false,
     }
 
     serveDirectory(options);
