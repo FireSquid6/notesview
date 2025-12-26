@@ -18,7 +18,7 @@ export function FileItem({ node, currentPath, activePath, level }: FileItemProps
   
   if (node.type === "directory") {
     const isExpanded = isPrefixOf(nodePath, activePath);
-    const href = pathString ? `/${encodeURIComponent(pathString)}` : "/";
+    const href = pathString ? `/${encodeURI(pathString)}` : "/";
     
     return (
       <details open={isExpanded}>
@@ -42,7 +42,7 @@ export function FileItem({ node, currentPath, activePath, level }: FileItemProps
     const isActive = pathsEqual(nodePath, activePath);
     
     return (
-      <a href={`/${pathString}`}
+      <a href={`/${encodeURI(pathString)}`}
          class={`file-item file-link ${isActive ? 'active' : ''}`}
          style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}>
         <span class="file-icon">📄</span>

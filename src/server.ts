@@ -76,7 +76,7 @@ export function serveDirectory({ port, directory }: ServeOptions) {
 
     })
     .get("/*", async (ctx) => {
-      const pathParts = ctx.path.split("/");
+      const pathParts = decodeURI(ctx.path).split("/");
 
       while (pathParts[0] === "") {
         pathParts.shift();
