@@ -16,7 +16,4 @@ sha256sums_x86_64=('59299bacce472f5dbb5f8df2a90abf927ee18e58d2879ee05b798a759810
 package() {
     # Install the binary
     install -Dm755 "${srcdir}/${pkgname}-${pkgver}" "${pkgdir}/usr/bin/mdserve"
-
-    # Install the license
-    install -Dm644 "${srcdir}/../LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
