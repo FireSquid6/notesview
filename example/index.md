@@ -1,4 +1,6 @@
-
+---
+id: hello
+---
 
 This is the `index.md` file. It's pretty useful and contains all of the basic stuff.
 

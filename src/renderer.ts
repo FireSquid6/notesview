@@ -4,6 +4,7 @@ import { markedHighlight } from "marked-highlight";
 import Katex from "katex";
 import { marked } from "marked";
 import hljs from "highlight.js";
+import fm from "front-matter";
 
 
 const options = {
@@ -29,9 +30,8 @@ marked.use(markedHighlight({
 
 
 export async function renderHtml(markdown: string): Promise<string> {
-
-
-  const html = await marked(markdown);
+  const { body } = fm(markdown);
+  const html = await marked(body);
 
   return html;
 }

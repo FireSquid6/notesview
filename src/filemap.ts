@@ -29,6 +29,18 @@ export function getFileTree(rootDirectory: string): Node {
   const indexFile = path.join(rootDirectory, "index.md");
   const children = getDirectoryChildren(rootDirectory);
 
+  children.sort((a, b) => {
+    // Directories come first
+    if (a.type === "directory" && b.type === "file") {
+      return -1;
+    }
+    if (a.type === "file" && b.type === "directory") {
+      return 1;
+    }
+    // If both are the same type, sort alphabetically
+    return a.name.localeCompare(b.name);
+  });
+
   const content: ContentData = fs.existsSync(indexFile) ? {
     type: "markdown-file",
     filepath: indexFile,
