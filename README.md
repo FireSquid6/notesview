@@ -4,7 +4,7 @@
 - [ ] following links correctly
 - [x] fix the math stuff
 - [x] sidebar
-- [ ] work with spaces correctly
-- [ ] directory listing page
-- [ ] the sidebar auto expands to the correct place
-- [ ] listener that reloads automatically
+- [x] work with spaces correctly
+- [x] directory listing page
+- [x] the sidebar auto expands to the correct place
+- [x] listener that reloads automatically
