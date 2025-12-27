@@ -1,12 +1,15 @@
 import { textLoaderPlugin } from "./plugin.ts";
+import fs from "fs";
+
+fs.mkdirSync("./dist", { recursive: true });
 
 await Bun.build({
   entrypoints: ["./src/index.ts"],
   outdir: "./dist",
   target: "bun",
   minify: false,
-  sourcemap: "external",
+  sourcemap: "inline",
   plugins: [textLoaderPlugin],
 });
 
-console.log("Build complete! Output: dist/index.js");
+console.log("Bundle complete! Output: dist/index.js");
