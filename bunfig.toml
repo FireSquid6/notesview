@@ -1,1 +1,1 @@
-preload = ["./loader.ts"]
+preload = ["./build/loader.ts"]
