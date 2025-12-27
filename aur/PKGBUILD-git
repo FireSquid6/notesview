@@ -1,0 +1,39 @@
+# Maintainer: Jonathan Deiss <me@jdeiss.com>
+
+pkgname=mdserve
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Serve a directory of markdown files for easy viewing"
+arch=('x86_64')
+url="https://github.com/FireSquid6/markdown-preview-server"
+license=('MIT')
+depends=('bun')
+makedepends=('git')
+provides=('mdserve')
+conflicts=('mdserve-bin')
+
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+sha256sums=('174f48d9c0b0bef10002de00586cf02cd87cf719151cbd2226c1005d9fdde988')
+
+build() {
+    cd "${srcdir}/markdown-preview-server-${pkgver}"
+
+    # Install dependencies
+    bun install
+
+    # Build the bundle
+    bun run build/bundle.ts
+
+    # Create the binary
+    bun build ./dist/index.js --compile --outfile ./mdserve
+}
+
+package() {
+    cd "${srcdir}/markdown-preview-server-${pkgver}"
+
+    # Install the binary
+    install -Dm755 mdserve "${pkgdir}/usr/bin/mdserve"
+
+    # Install the license
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
