@@ -1,19 +1,38 @@
 # Maintainer: Jonathan Deiss <me@jdeiss.com>
 
-pkgname=mdserve-bin
+pkgname=notesview
 pkgver=1.0.0
 pkgrel=1
 pkgdesc="Serve a directory of markdown files for easy viewing"
 arch=('x86_64')
-url="https://github.com/FireSquid6/markdown-preview-server"
+url="https://github.com/FireSquid6/notesview"
 license=('MIT')
-provides=('mdserve')
-conflicts=('mdserve')
+depends=('bun')
+makedepends=('git')
+provides=('notesview')
 
-source_x86_64=("${pkgname}-${pkgver}::${url}/releases/download/v${pkgver}/mdserve-linux-x64")
-sha256sums_x86_64=('59299bacce472f5dbb5f8df2a90abf927ee18e58d2879ee05b798a759810c3f1')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+sha256sums=('174f48d9c0b0bef10002de00586cf02cd87cf719151cbd2226c1005d9fdde988')
+
+build() {
+    cd "${srcdir}/notesview-${pkgver}"
+
+    # Install dependencies
+    bun install
+
+    # Build the bundle
+    bun run build/bundle.ts
+
+    # Create the binary
+    bun build ./dist/index.js --compile --outfile ./mdserve
+}
 
 package() {
+    cd "${srcdir}/notesview-${pkgver}"
+
     # Install the binary
-    install -Dm755 "${srcdir}/${pkgname}-${pkgver}" "${pkgdir}/usr/bin/mdserve"
+    install -Dm755 mdserve "${pkgdir}/usr/bin/notesview"
+
+    # Install the license
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

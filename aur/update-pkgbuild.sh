@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 
-# Helper script to update PKGBUILD for a new release
+# Helper script to update PKGBUILD-git for a new release
 
 if [ -z "$1" ]; then
-    echo "Usage: ./update-pkgbuild.sh <version>"
-    echo "Example: ./update-pkgbuild.sh 1.0.0"
+    echo "Usage: ./update-pkgbuild-git.sh <version>"
+    echo "Example: ./update-pkgbuild-git.sh 1.0.0"
     exit 1
 fi
 
 VERSION=$1
-URL="https://github.com/FireSquid6/markdown-preview-server/releases/download/v${VERSION}/mdserve-linux-x64"
+URL="https://github.com/FireSquid6/markdown-preview-server/archive/v${VERSION}.tar.gz"
 
-echo "Downloading binary to calculate checksum..."
+echo "Downloading source tarball to calculate checksum..."
 TEMP_FILE=$(mktemp)
 curl -L -o "$TEMP_FILE" "$URL"
 
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to download binary from $URL"
-    echo "Make sure the release exists on GitHub!"
+    echo "Error: Failed to download source from $URL"
+    echo "Make sure the release tag exists on GitHub!"
     rm "$TEMP_FILE"
     exit 1
 fi
@@ -30,8 +30,9 @@ echo "Version: $VERSION"
 echo "SHA256: $CHECKSUM"
 echo ""
 
-# Update PKGBUILD
-sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD
-sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
-sed -i "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('${CHECKSUM}')/" PKGBUILD
+# Update PKGBUILD-git
+sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD-git
+sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD-git
+sed -i "s/^sha256sums=.*/sha256sums=('${CHECKSUM}')/" PKGBUILD-git
 
+echo "PKGBUILD-git updated!"
